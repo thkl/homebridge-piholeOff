@@ -1,7 +1,8 @@
 
-var Service, Characteristic
-var http = require('http')
-
+var Service, Characteristic, homebridge
+const http = require('http')
+const fs = require('fs')
+const path = require('path')
 const baseURL = '/admin/api.php'
 
 class pihole {
@@ -12,10 +13,9 @@ class pihole {
     this.model = config.model || 'PiHoleOff'
     this.serial = config['serial-number'] || '123-456-789'
     this.name = 'PiholeOff'
-
+    this.time = config.time || 0 // this will be overriden by the homekit setDuration and stored persistent
     this.auth = config.auth || ''
     this.host = config.host || 'localhost'
-    this.time = config.time || 0
     this.port = config.port || 80
     // logLevel 0: disabled, 1: error, 2: info
     if (typeof config.logLevel === 'undefined') {
@@ -23,8 +23,25 @@ class pihole {
     } else {
       this.logLevel = config.logLevel
     }
+    this.loadPersistentData()
     this.remainTime = this.time
     this.log.info('init done')
+  }
+
+  loadPersistentData () {
+    let strFile = path.join(homebridge.user.storagePath(), this.serial + '.json')
+    if (fs.existsSync(strFile)) {
+      try {
+        this.time = JSON.parse(fs.readFileSync(strFile))
+      } catch (e) {
+        this.time = 0
+      }
+    }
+  }
+
+  savePersistentData () {
+    let strFile = path.join(homebridge.user.storagePath(), this.serial + '.json')
+    fs.writeFileSync(strFile, JSON.stringify(this.time))
   }
 
   getServices () {
@@ -63,6 +80,7 @@ class pihole {
       })
       .on('set', function (value, callback) {
         self.time = value
+        self.savePersistentData()
         self.log.debug('set new duration')
         if ((self.remainTime > -1) || (self.infinity === true)) {
           self.remainTime = self.time
@@ -110,7 +128,6 @@ class pihole {
         self.log.debug('setOn %s', newVal)
         this.timer = setInterval(() => {
           self.remainTime = self.remainTime - 1
-          self.log.debug('time remain %s', self.remainTime)
           if (self.remainTime < 0) {
             clearInterval(self.timer)
             self.getStatus()
@@ -165,5 +182,6 @@ class pihole {
 module.exports = function (hb) {
   Service = hb.hap.Service
   Characteristic = hb.hap.Characteristic
+  homebridge = hb
   hb.registerAccessory('homebridge-piholeOff', 'PiholeOff', pihole)
 }
