@@ -1,0 +1,27 @@
+{
+  "name": "homebridge-piholeoff",
+  "version": "0.0.1",
+  "description": "Pihole Switch for Homebridge: https://github.com/nfarina/homebridge",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js && echo \"No syntax errors! (node $(node -v))\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thkl/homebridge-piholeOff"
+  },
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "author": "thkl",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thkl/homebridge-piholeOff/issues"
+  },
+  "homepage": "https://github.com/thkl/homebridge-piholeOff#readme",
+  "dependencies": {},
+  "engines": {
+    "node": ">=6.0.0",
+    "homebridge": ">=0.2.0"
+  }
+}
