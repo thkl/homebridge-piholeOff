@@ -23,6 +23,8 @@ class pihole {
     } else {
       this.logLevel = config.logLevel
     }
+    this.remainTime = this.time
+    this.log.info('init done')
   }
 
   getServices () {
@@ -32,37 +34,26 @@ class pihole {
       .setCharacteristic(Characteristic.Model, this.model)
       .setCharacteristic(Characteristic.SerialNumber, this.serial)
 
-    this.serviceItem = new Service.Valve(this.name)
-
-    let type = this.serviceItem.getCharacteristic(Characteristic.ValveType)
-      .on('get', function (callback) {
-        callback(null, Characteristic.ValveType.GENERIC_VALVE)
-      })
-    type.updateValue(Characteristic.ValveType.GENERIC_VALVE, null)
+    this.serviceItem = new Service.Switch(this.name)
+    this.serviceItem.addOptionalCharacteristic(Characteristic.SetDuration)
+    this.serviceItem.addOptionalCharacteristic(Characteristic.RemainingDuration)
 
     this.isActive = this.serviceItem
-      .getCharacteristic(Characteristic.Active)
+      .getCharacteristic(Characteristic.On)
       .on('get', async (callback) => {
         let isDisabled = await self.getStatus()
-        callback(null, (isDisabled) ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE)
+        self.log.debug('get is off %s', isDisabled)
+        callback(null, isDisabled)
       })
 
       .on('set', async (active, callback) => {
-        await self.setStatus((active === 1))
-        if (active === 1) {
+        await self.setStatus((active === true))
+        self.log.debug('set is off %s', active)
+
+        if (active === true) {
           self.infinity = (self.time === 0)
           self.remainTime = self.time
         }
-        callback()
-      })
-
-    this.chrInUse = this.serviceItem.getCharacteristic(Characteristic.InUse)
-      .on('get', async (callback) => {
-        let isDisabled = await self.getStatus()
-        callback(null, (isDisabled) ? Characteristic.InUse.IN_USE : Characteristic.InUse.NOT_IN_USE)
-      })
-
-      .on('set', (value, callback) => {
         callback()
       })
 
@@ -72,6 +63,7 @@ class pihole {
       })
       .on('set', function (value, callback) {
         self.time = value
+        self.log.debug('set new duration')
         if ((self.remainTime > -1) || (self.infinity === true)) {
           self.remainTime = self.time
           self.infinity = (self.time === 0)
@@ -85,6 +77,7 @@ class pihole {
 
     this.chrRemainTime = this.serviceItem.getCharacteristic(Characteristic.RemainingDuration)
       .on('get', function (callback) {
+        self.log.debug('getRemaining time %s', self.remainTime)
         callback(null, self.remainTime)
       })
 
@@ -103,8 +96,7 @@ class pihole {
         if (!isDisabled) {
           self.remainTime = -1
         }
-        self.chrInUse.updateValue((isDisabled) ? Characteristic.InUse.IN_USE : Characteristic.InUse.NOT_IN_USE, null)
-        self.isActive.updateValue((isDisabled) ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE, null)
+        self.isActive.updateValue(isDisabled, null)
         resolve(isDisabled)
       }, (error) => { reject(error) })
     })
@@ -115,8 +107,10 @@ class pihole {
     return new Promise((resolve, reject) => {
       clearInterval(this.timer)
       if (newVal) {
+        self.log.debug('setOn %s', newVal)
         this.timer = setInterval(() => {
           self.remainTime = self.remainTime - 1
+          self.log.debug('time remain %s', self.remainTime)
           if (self.remainTime < 0) {
             clearInterval(self.timer)
             self.getStatus()
