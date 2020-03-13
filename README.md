@@ -26,9 +26,9 @@ There are four options:
 -   `logLevel` Logging level, three different levels: 0: logging disabled, 1: logs only HTTP errors, 2: logs each HTTP response. Default is set to 1.
 
 See the [sample-config.json](sample-config.json) file to see an example of how to configure the accessory. 
-This plugin will do the oppisite of the original [homebridge-pihole](https://github.com/arendruni/homebridge-pihole) . It will setup a Homekit Switch. 
-This switch has optional characteristics for the duration time.
-You are able to set this time as a default or every time you turn on the switch (and turn off pihole). Note: the duration set time and the time the switch remains on (and the pi-hole off) is only visible in the eve app. The Apple Home App will not show you this settings. But it will turn off the switch (and turn on pi-hole) as well.
+This plugin will do the same as the original [homebridge-pihole](https://github.com/arendruni/homebridge-pihole). It will setup a Homekit Switch. 
+But this switch has optional characteristics for the duration time.
+You are able to set this time as a default or every time you turn on the switch (and turn off pihole). Note: the duration set time and the time the switch remains off (and the pi-hole off) is only visible in the eve app. The Apple Home App will not show you this settings. But it will turn on the switch (and turn on pi-hole) as well.
 
 ## How to get a Pi-hole authentication token
 

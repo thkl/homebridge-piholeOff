@@ -58,18 +58,19 @@ class pihole {
     this.isActive = this.serviceItem
       .getCharacteristic(Characteristic.On)
       .on('get', async (callback) => {
-        let isDisabled = await self.getStatus()
-        self.log.debug('get is off %s', isDisabled)
-        callback(null, isDisabled)
+        let isEnabled = await self.getStatus()
+        self.log.debug('get is off %s', isEnabled)
+        callback(null, isEnabled)
       })
 
       .on('set', async (active, callback) => {
         await self.setStatus((active === true))
         self.log.debug('set is off %s', active)
 
-        if (active === true) {
+        if (active === false) {
           self.infinity = (self.time === 0)
           self.remainTime = self.time
+          self.log.debug('Infinity %s Time %s ', self.infinity, self.remainTime)
         }
         callback()
       })
@@ -110,12 +111,12 @@ class pihole {
   getStatus () {
     let self = this
     return new Promise((resolve, reject) => {
-      this._makeRequest('?status').then((isDisabled) => {
-        if (!isDisabled) {
+      this._makeRequest('?status').then((isEnabled) => {
+        if (isEnabled) {
           self.remainTime = -1
         }
-        self.isActive.updateValue(isDisabled, null)
-        resolve(isDisabled)
+        self.isActive.updateValue(isEnabled, null)
+        resolve(isEnabled)
       }, (error) => { reject(error) })
     })
   }
@@ -124,7 +125,7 @@ class pihole {
     let self = this
     return new Promise((resolve, reject) => {
       clearInterval(this.timer)
-      if (newVal) {
+      if (newVal === false) {
         self.log.debug('setOn %s', newVal)
         this.timer = setInterval(() => {
           self.remainTime = self.remainTime - 1
@@ -135,9 +136,9 @@ class pihole {
           self.chrRemainTime.updateValue(self.remainTime, null)
         }, 1000)
       }
-      this._makeRequest((!newVal ? '?enable' : ('?disable=' + this.time)) + '&auth=' + this.auth).then((isDisabled) => {
+      this._makeRequest((newVal ? '?enable' : ('?disable=' + this.time)) + '&auth=' + this.auth).then((isEnabled) => {
         setTimeout(() => { self.getStatus() }, 500)
-        resolve(isDisabled)
+        resolve(isEnabled)
       }, (error) => { reject(error) })
     })
   }
@@ -160,7 +161,7 @@ class pihole {
             let jsonBody = JSON.parse(body)
 
             if (jsonBody.status) {
-              resolve(jsonBody.status === 'disabled')
+              resolve(jsonBody.status === 'enabled')
             } else {
               reject(new Error('invalid json'))
             }
