@@ -18,7 +18,7 @@ class pihole {
     this.host = config.host || 'localhost'
     this.port = config.port || 80
     this.urlEnabled = config.urlEnabled
-    this.urlDissabled = config.urlDissabled
+    this.urlDisabled = config.urlDisabled
     // logLevel 0: disabled, 1: error, 2: info
     if (typeof config.logLevel === 'undefined') {
       this.logLevel = 1
@@ -152,8 +152,8 @@ class pihole {
       http.get(this.urlEnabled)
     }
 
-    if ((!isEnabled) && (this.urlDissabled)) {
-      http.get(this.urlDissabled)
+    if ((!isEnabled) && (this.urlDisabled)) {
+      http.get(this.urlDisabled)
     }
   }
 

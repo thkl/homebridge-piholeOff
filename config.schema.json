@@ -47,11 +47,11 @@
                 "required": false,
                 "description": "the url the plugin will call after the piHole gets enabled (use this for status board etc)"
             },
-            "urlDissabled": {
-                "title": "URL Enabled",
+            "urlDisabled": {
+                "title": "URL disabled",
                 "type": "string",
                 "required": false,
-                "description": "the url the plugin will call after the piHole gets enabled (use this for status board etc)"
+                "description": "the url the plugin will call after the piHole gets disabled (use this for status board etc)"
             },
             "logLevel": {
                 "title": "Loging level",
