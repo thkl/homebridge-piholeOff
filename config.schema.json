@@ -41,6 +41,18 @@
                 "required": false,
                 "description": "How long Pi-hole will be disabled by default, in seconds, default is 0 that means permanently disabled. You are able to change this in homekit"
             },
+            "urlEnabled": {
+                "title": "URL Enabled",
+                "type": "string",
+                "required": false,
+                "description": "the url the plugin will call after the piHole gets enabled (use this for status board etc)"
+            },
+            "urlDissabled": {
+                "title": "URL Enabled",
+                "type": "string",
+                "required": false,
+                "description": "the url the plugin will call after the piHole gets enabled (use this for status board etc)"
+            },
             "logLevel": {
                 "title": "Loging level",
                 "type": "integer",

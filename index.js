@@ -17,6 +17,8 @@ class pihole {
     this.auth = config.auth || ''
     this.host = config.host || 'localhost'
     this.port = config.port || 80
+    this.urlEnabled = config.urlEnabled
+    this.urlDissabled = config.urlDissabled
     // logLevel 0: disabled, 1: error, 2: info
     if (typeof config.logLevel === 'undefined') {
       this.logLevel = 1
@@ -114,6 +116,7 @@ class pihole {
       this._makeRequest('?status').then((isEnabled) => {
         if (isEnabled) {
           self.remainTime = -1
+          self._makeReportStatusRequest(isEnabled)
         }
         self.isActive.updateValue(isEnabled, null)
         resolve(isEnabled)
@@ -138,9 +141,20 @@ class pihole {
       }
       this._makeRequest((newVal ? '?enable' : ('?disable=' + this.time)) + '&auth=' + this.auth).then((isEnabled) => {
         setTimeout(() => { self.getStatus() }, 500)
+        self._makeReportStatusRequest(isEnabled)
         resolve(isEnabled)
       }, (error) => { reject(error) })
     })
+  }
+
+  _makeReportStatusRequest (isEnabled) {
+    if ((isEnabled) && (this.urlEnabled)) {
+      http.get(this.urlEnabled)
+    }
+
+    if ((!isEnabled) && (this.urlDissabled)) {
+      http.get(this.urlDissabled)
+    }
   }
 
   _makeRequest (path, next) {
