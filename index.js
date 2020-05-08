@@ -12,7 +12,7 @@ class pihole {
     this.manufacturer = config.manufacturer || 'My manufacturer'
     this.model = config.model || 'PiHoleOff'
     this.serial = config['serial-number'] || '123-456-789'
-    this.name = 'PiholeOff'
+    this.name = 'piholeoff'
     this.time = config.time || 0 // this will be overriden by the homekit setDuration and stored persistent
     this.auth = config.auth || ''
     this.host = config.host || 'localhost'
@@ -198,5 +198,5 @@ module.exports = function (hb) {
   Service = hb.hap.Service
   Characteristic = hb.hap.Characteristic
   homebridge = hb
-  hb.registerAccessory('homebridge-piholeOff', 'PiholeOff', pihole)
+  hb.registerAccessory('homebridge-piholeoff', 'PiholeOff', pihole)
 }
